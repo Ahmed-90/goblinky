@@ -6,7 +6,7 @@
 *.so
 *.dylib
 
-# Test binary, build with `go test -c`
+# Test binary, utils with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
@@ -15,9 +15,4 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 
-.idea/.name
-.idea/goblinky.iml
-.idea/inspectionProfiles/
-.idea/modules.xml
-.idea/workspace.xml
-build/
+.idea/

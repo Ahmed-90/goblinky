@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"fmt"
 	"os"
+	"flag"
 )
 
 const (
@@ -19,6 +20,9 @@ var store = make(map[string]gpio.Led)
 
 func main() {
 
+	port := flag.String("port", "4500", "Server Port")
+	flag.Parse()
+
 	if _, err := exec.LookPath("gpio"); err != nil{
 		fmt.Println("Wiringpi not installed")
 		os.Exit(1)
@@ -30,7 +34,7 @@ func main() {
 	r.HandleFunc("/set"+PinParam+DurParam+PatternParam, setLed)
 	r.HandleFunc("/stop"+PinParam, stopLed)
 
-	http.ListenAndServe(":8000", r)
+	http.ListenAndServe(":"+*port, r)
 
 }
 

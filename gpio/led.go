@@ -27,20 +27,20 @@ func (l *Led) nextStep() {
 	l.stepper = time.NewTimer(l.duration * time.Duration(l.pattern[l.step]))
 	if l.step++; l.step > len(l.pattern)-1 {
 		l.step = 0
+		l.state = false
 	}
 }
 
 func (l *Led) exec() {
 	l.state = !l.state
 	s := "0"
-	if l.state {
+	if l.state == true {
 		s = "1"
 	}
 
 	fmt.Println(s, l)
 
-	exec.Command("gpio", "-g", "write", l.Pin, s)
-
+	exec.Command("gpio", "-g", "write", l.Pin, s).Run()
 }
 
 func (l *Led) Stop() {
@@ -58,7 +58,7 @@ func (l *Led) runner() {
 	for {
 		select {
 		case <-l.quit:
-			exec.Command("gpio", "-g", "write", l.Pin, "0")
+			exec.Command("gpio", "-g", "write", l.Pin, "0").Run()
 			return
 		case <-l.stepper.C:
 			l.exec()
