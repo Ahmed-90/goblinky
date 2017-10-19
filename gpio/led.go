@@ -1,14 +1,15 @@
 package gpio
 
 import (
-	"time"
-	"strings"
-	"strconv"
 	"fmt"
+	"strings"
+	"time"
+	"os/exec"
+	"strconv"
 )
 
 type Led struct {
-	Pin      int
+	Pin      string
 	pattern  []int
 	duration time.Duration
 	step     int
@@ -24,14 +25,22 @@ func (l *Led) Blink() {
 
 func (l *Led) nextStep() {
 	l.stepper = time.NewTimer(l.duration * time.Duration(l.pattern[l.step]))
-	if l.step++; l.step > len(l.pattern) - 1{
+	if l.step++; l.step > len(l.pattern)-1 {
 		l.step = 0
 	}
 }
 
 func (l *Led) exec() {
-	fmt.Println(!l.state, l)
 	l.state = !l.state
+	s := "0"
+	if l.state {
+		s = "1"
+	}
+
+	fmt.Println(s, l)
+
+	exec.Command("gpio", "-g", "write", l.Pin, s)
+
 }
 
 func (l *Led) Stop() {
@@ -49,7 +58,7 @@ func (l *Led) runner() {
 	for {
 		select {
 		case <-l.quit:
-			fmt.Println("Quitting")
+			exec.Command("gpio", "-g", "write", l.Pin, "0")
 			return
 		case <-l.stepper.C:
 			l.exec()
@@ -82,11 +91,18 @@ func (l *Led) Update(d string, p string) {
 	l.Blink()
 }
 
-func Make(p int, dur string, pat string) Led {
-	l := Led{Pin:p}
+
+
+func Make(pin string, dur string, pat string) Led {
+	l := Led{}
+	l.Pin = pin
+
+	exec.Command("gpio", "-g", "mode", l.Pin, "out").Run()
+
 	l.setDuration(dur)
 	l.setPattern(pat)
 	l.quit = make(chan struct{})
 
 	return l
 }
+
